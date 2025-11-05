@@ -15,9 +15,8 @@ const log = debug("express-api:users");
 const router = express.Router();
 
 router.post('/', async (req, res, next) => {
-  const costFactor = 10;
   const plainPassword = req.body.password;
-  const passwordHash = await bcrypt.hash(plainPassword, costFactor);
+  const passwordHash = await bcrypt.hash(plainPassword, config.bcryptCostFactor);
 
   // Create a new document from the JSON in the request body
   const newUser = new User(req.body);

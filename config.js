@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv'
 
 dotenv.config()
 
+export const bcryptCostFactor = 10;
 export const databaseUrl = process.env.DATABASE_URL || 'mongodb://localhost/express-api';
 export const port = process.env.PORT || 3000;
 export const secretKey = process.env.SECRET_KEY;

@@ -2,41 +2,22 @@ import express from "express";
 import createError from "http-errors";
 import logger from "morgan";
 import mongoose from 'mongoose';
-import fs from "node:fs/promises";
 
+import * as config from './config.js';
 import indexRouter from "./routes/index.js";
 import usersRouter from "./routes/users.js";
 
-mongoose.connect('mongodb://localhost/express-api2');
+mongoose.connect(config.databaseUrl);
 
 const app = express();
 
+if (process.env.NODE_ENV !== "test") {
+  app.use(logger("dev"));
+}
+
 app
-  .use(logger("dev"))
   .use(express.json())
   .use(express.urlencoded({ extended: false }));
-
-function prepareName(req, res, next) {
-  req.name = "Alice";
-  next();
-}
-
-function myMiddleware(req, res, next) {
-  console.log(`Hello ${req.name}!`);
-  // res.send('Hello World!');
-  next();
-}
-
-app.use(prepareName, myMiddleware);
-
-app.get('/files', async function (req, res) {
-  const files = await fs.readdir('./');
-  res.json(files);
-});
-
-app.post('/ping', function ping(req, res, next) {
-  res.send('pong');
-});
 
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
@@ -48,6 +29,8 @@ app.use(function (req, res, next) {
 
 // error handler
 app.use(function (err, req, res, next) {
+  console.warn(err);
+
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get("env") === "development" ? err : {};

@@ -1,22 +1,28 @@
 import bcrypt from "bcrypt";
+import { v2 as cloudinary } from "cloudinary";
 import debug from "debug";
 import express from "express";
-import jwt from 'jsonwebtoken';
-import { promisify } from 'util';
+import jwt from "jsonwebtoken";
+import multer from "multer";
+import { promisify } from "util";
 
 import User from "../models/user.js";
 import { authenticate } from "./auth.js";
 import * as config from "../config.js";
 
 const signJwt = promisify(jwt.sign);
+const upload = multer({ dest: "uploads/" });
 
 const log = debug("express-api:users");
 
 const router = express.Router();
 
-router.post('/', async (req, res, next) => {
+router.post("/", async (req, res, next) => {
   const plainPassword = req.body.password;
-  const passwordHash = await bcrypt.hash(plainPassword, config.bcryptCostFactor);
+  const passwordHash = await bcrypt.hash(
+    plainPassword,
+    config.bcryptCostFactor,
+  );
 
   // Create a new document from the JSON in the request body
   const newUser = new User(req.body);
@@ -25,23 +31,35 @@ router.post('/', async (req, res, next) => {
   // Save that document
   const savedUser = await newUser.save();
 
-  log('Created new user', savedUser);
+  log("Created new user", savedUser);
 
   // Send the saved document back as the response.
   res.send(savedUser);
 });
 
 router.get("/", authenticate, async function (req, res, next) {
-  log('GET /users called by user with ID', req.currentUserId);
+  log("GET /users called by user with ID", req.currentUserId);
 
-  const users = await User.find().sort('name').exec();
+  const users = await User.find().sort("name").exec();
 
   res.send(users);
 });
 
-router.put("/:id", async function(req, res, next) {
+router.put("/:id", async function (req, res, next) {
   const user = await User.findById(req.params.id).exec();
   user.name = req.body.name;
+
+  const updatedUser = await user.save();
+
+  res.send(updatedUser);
+});
+
+router.put("/:id/avatar", upload.single("avatar"), async function (req, res) {
+  const user = await User.findById(req.params.id).exec();
+
+  // Upload to Cloudinary
+  const uploadResult = await cloudinary.uploader.upload(req.file.path);
+  user.avatarUrl = uploadResult.secure_url;
 
   const updatedUser = await user.save();
 
@@ -68,7 +86,7 @@ router.post("/login", async function (req, res, next) {
   // Login is valid.
   res.send({
     message: `Welcome ${user.name}!`,
-    token
+    token,
   });
 });
 

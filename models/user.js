@@ -1,14 +1,15 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 // Define the schema for users
 const userSchema = new Schema({
   name: String,
-  passwordHash: String
+  passwordHash: String,
+  avatarUrl: String,
 });
 
 userSchema.set("toJSON", {
-   transform: transformJsonUser
+  transform: transformJsonUser,
 });
 
 function transformJsonUser(doc, json, options) {
@@ -19,4 +20,4 @@ function transformJsonUser(doc, json, options) {
 }
 
 // Create the model from the schema and export it
-export default mongoose.model('User', userSchema);
+export default mongoose.model("User", userSchema);

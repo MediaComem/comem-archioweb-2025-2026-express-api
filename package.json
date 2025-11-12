@@ -5,17 +5,19 @@
   "type": "module",
   "scripts": {
     "dev": "nodemon",
-    "start": "node ./bin/start",
+    "start": "cross-env DEBUG=express-api:* node ./bin/start",
     "test": "cross-env DATABASE_URL=mongodb://127.0.0.1/express-api-test DOTENV_CONFIG_QUIET=true SECRET_KEY=changeme node --experimental-vm-modules --disable-warning=ExperimentalWarning node_modules/.bin/jest --coverage --runInBand"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "cloudinary": "^2.8.0",
     "debug": "^4.4.1",
     "express": "^5.1.0",
     "http-errors": "^2.0.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.2",
-    "morgan": "^1.10.1"
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2"
   },
   "devDependencies": {
     "cross-env": "^10.1.0",
